@@ -17,6 +17,10 @@ public class Benchmarks {
     private static final ExecutorService executor = Executors.newFixedThreadPool(1);
 
     private static final ExecutorService executorJuc = java.util.concurrent.Executors.newFixedThreadPool(1);
+    
+    private static final ExecutorService executor2 = Executors.newFixedThreadPool(2);
+
+    private static final ExecutorService executor2Juc = java.util.concurrent.Executors.newFixedThreadPool(2);
 
     @Benchmark
     public boolean executorDoNothingManyTimesSingleThreadMore(Blackhole bh) throws InterruptedException {
@@ -26,6 +30,16 @@ public class Benchmarks {
     @Benchmark
     public boolean executorDoNothingManyTimesSingleThreadJuc(Blackhole bh) throws InterruptedException {
         return execute(executorJuc);
+    }
+    
+    @Benchmark
+    public boolean executorDoNothingManyTimesTwoThreadsMore(Blackhole bh) throws InterruptedException {
+        return execute(executor2);
+    }
+
+    @Benchmark
+    public boolean executorDoNothingManyTimesTwoThreadsJuc(Blackhole bh) throws InterruptedException {
+        return execute(executor2Juc);
     }
 
     private boolean execute(ExecutorService executor) throws InterruptedException {
