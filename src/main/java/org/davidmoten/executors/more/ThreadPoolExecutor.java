@@ -914,29 +914,41 @@ public class ThreadPoolExecutor extends AbstractExecutorService {
      * @return true if successful
      */
     private boolean addWorker(Runnable firstTask, boolean core) {
-        retry:
-        for (;;) {
-            int c = ctl.get();
-            int rs = runStateOf(c);
-
-            // Check if queue empty only if necessary.
-            if (rs >= SHUTDOWN &&
-                ! (rs == SHUTDOWN &&
-                   firstTask == null &&
-                   ! workQueue.isEmpty()))
-                return false;
-
+        {
+            int c = 0;
+            int rs = 0;
+            boolean reread = true;
+            retry:
             for (;;) {
-                int wc = workerCountOf(c);
-                if (wc >= CAPACITY ||
-                    wc >= (core ? corePoolSize : maximumPoolSize))
+                if (reread) {
+                    c = ctl.get();
+                    rs = runStateOf(c);
+                } else {
+                    reread = true;
+                }
+                // Check if queue empty only if necessary.
+                if (rs >= SHUTDOWN &&
+                    ! (rs == SHUTDOWN &&
+                       firstTask == null &&
+                       ! workQueue.isEmpty()))
                     return false;
-                if (compareAndIncrementWorkerCount(c))
-                    break retry;
-                c = ctl.get();  // Re-read ctl
-                if (runStateOf(c) != rs)
-                    continue retry;
-                // else CAS failed due to workerCount change; retry inner loop
+    
+                for (;;) {
+                    int wc = workerCountOf(c);
+                    if (wc >= CAPACITY ||
+                        wc >= (core ? corePoolSize : maximumPoolSize))
+                        return false;
+                    if (compareAndIncrementWorkerCount(c))
+                        break retry;
+                    c = ctl.get();  // Re-read ctl
+                    int rs2 = runStateOf(c);
+                    if (rs2 != rs) {
+                        rs = rs2;
+                        reread = false;
+                        continue retry;
+                    }
+                    // else CAS failed due to workerCount change; retry inner loop
+                }
             }
         }
 
