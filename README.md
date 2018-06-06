@@ -1,7 +1,7 @@
 # more-executors
-More performant Java Executors
+More performant Java Executors.
 
-Tweaks `ThreadPoolExecutor` in particular.
+Tweaks `j.u.c.ThreadPoolExecutor` in particular.
 
 * make six frequently read volatile fields final
 * reduce volatile reads (e.g. `ctl.get()` in `addWorker`)
