@@ -1,5 +1,6 @@
 package org.davidmoten.executors.more;
 
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadFactory;
@@ -12,8 +13,14 @@ public final class Executors {
     }
 
     public static ExecutorService newFixedThreadPool(int nThreads) {
-        return new ThreadPoolExecutor(nThreads, nThreads, 0L, TimeUnit.MILLISECONDS, false,
+        return newThreadPool(nThreads, nThreads, 0L, TimeUnit.MILLISECONDS, false,
                 new LinkedBlockingQueue<Runnable>());
+    }
+
+    public static ExecutorService newThreadPool(int corePoolSize, int maximumPoolSize, long keepAliveTime,
+            TimeUnit unit, boolean allowThreadCoreTimeout, BlockingQueue<Runnable> workQueue) {
+        return new ThreadPoolExecutor(corePoolSize, maximumPoolSize, keepAliveTime, unit, allowThreadCoreTimeout,
+                workQueue);
     }
 
     public static ThreadFactory defaultThreadFactory() {
