@@ -299,9 +299,9 @@
                                         <argument>-f</argument>
                                         <argument>1</argument>
                                         <argument>-i</argument>
-                                        <argument>5</argument>
+                                        <argument>10</argument>
                                         <argument>-wi</argument>
-                                        <argument>3</argument>
+                                        <argument>4</argument>
                                         <argument>-jvmArgs</argument>
                                         <argument>-Xmx512m</argument>
                                     </arguments>
