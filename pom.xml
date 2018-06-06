@@ -24,9 +24,8 @@
         <maven.compiler.target>1.8</maven.compiler.target>
         <rxjava.version>2.1.13</rxjava.version>
         <jmh.version>1.11.1</jmh.version>
-        <exec.version>1.4.0</exec.version>
-        <slf4j.version>1.7.12</slf4j.version>
-        <jetty.version>9.4.10.v20180503</jetty.version>
+        <exec.version>1.6.0</exec.version>
+        <jmh.version>1.21</jmh.version>
 
         <cobertura.version>2.7</cobertura.version>
         <checkstyle.version>2.16</checkstyle.version>
@@ -105,6 +104,20 @@
             <groupId>com.github.davidmoten</groupId>
             <artifactId>junit-extras</artifactId>
             <version>0.3</version>
+            <scope>test</scope>
+        </dependency>
+        
+         <dependency>
+            <groupId>org.openjdk.jmh</groupId>
+            <artifactId>jmh-core</artifactId>
+            <version>${jmh.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.openjdk.jmh</groupId>
+            <artifactId>jmh-generator-annprocess</artifactId>
+            <version>${jmh.version}</version>
             <scope>test</scope>
         </dependency>
 
@@ -250,5 +263,55 @@
                 <password>${svn.password}</password> </configuration> </plugin> -->
         </plugins>
     </reporting>
+    
+    <profiles>
+        <profile>
+            <id>benchmark</id>
+            <dependencies>
+                <dependency>
+                    <groupId>org.openjdk.jmh</groupId>
+                    <artifactId>jmh-generator-annprocess</artifactId>
+                    <version>${jmh.version}</version>
+                    <scope>test</scope>
+                </dependency>
+            </dependencies>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <version>${exec.version}</version>
+                        <executions>
+                            <execution>
+                                <id>run-benchmarks</id>
+                                <phase>integration-test</phase>
+                                <goals>
+                                    <goal>exec</goal>
+                                </goals>
+                                <configuration>
+                                    <classpathScope>test</classpathScope>
+                                    <executable>java</executable>
+                                    <arguments>
+                                        <argument>-classpath</argument>
+                                        <classpath />
+                                        <argument>org.openjdk.jmh.Main</argument>
+                                        <!-- -h for help -->
+                                        <argument>-f</argument>
+                                        <argument>1</argument>
+                                        <argument>-i</argument>
+                                        <argument>10</argument>
+                                        <argument>-wi</argument>
+                                        <argument>8</argument>
+                                        <argument>-jvmArgs</argument>
+                                        <argument>-Xmx512m</argument>
+                                    </arguments>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 
 </project>
