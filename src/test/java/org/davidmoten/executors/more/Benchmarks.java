@@ -24,26 +24,27 @@ public class Benchmarks {
 
     @Benchmark
     public boolean executorDoNothingManyTimesSingleThreadMore(Blackhole bh) throws InterruptedException {
-        return execute(executor);
+        return execute(executor, bh);
     }
 
     @Benchmark
     public boolean executorDoNothingManyTimesSingleThreadJuc(Blackhole bh) throws InterruptedException {
-        return execute(executorJuc);
+        return execute(executorJuc, bh);
     }
     
 //    @Benchmark
     public boolean executorDoNothingManyTimesTwoThreadsMore(Blackhole bh) throws InterruptedException {
-        return execute(executor2);
+        return execute(executor2, bh);
     }
 
 //    @Benchmark
     public boolean executorDoNothingManyTimesTwoThreadsJuc(Blackhole bh) throws InterruptedException {
-        return execute(executor2Juc);
+        return execute(executor2Juc, bh);
     }
 
-    private boolean execute(ExecutorService executor) throws InterruptedException {
+    private boolean execute(ExecutorService executor, Blackhole bh) throws InterruptedException {
         Runnable r = () -> {
+            bh.consume(true);
         };
         for (int i = 0; i < 10000; i++) {
             executor.execute(r);
