@@ -13,31 +13,30 @@ import org.openjdk.jmh.infra.Blackhole;
 
 @State(Scope.Benchmark)
 public class Benchmarks {
-    
+
     private static final ExecutorService executor = Executors.newFixedThreadPool(1);
-    
+
     private static final ExecutorService executorJuc = java.util.concurrent.Executors.newFixedThreadPool(1);
-    
+
     @Benchmark
-    public boolean moreExecutor(Blackhole bh) throws InterruptedException {
+    public boolean executorDoNothingManyTimesSingleThreadMore(Blackhole bh) throws InterruptedException {
         return execute(executor);
     }
 
     @Benchmark
-    public boolean jucExecutor(Blackhole bh) throws InterruptedException {
+    public boolean executorDoNothingManyTimesSingleThreadJuc(Blackhole bh) throws InterruptedException {
         return execute(executorJuc);
     }
-    
+
     private boolean execute(ExecutorService executor) throws InterruptedException {
-        AtomicLong count = new AtomicLong();
-        Runnable r = () -> count.incrementAndGet();
-        for (int i = 0;i <1000000;i++) {
+        Runnable r = () -> {
+        };
+        for (int i = 0; i < 10000; i++) {
             executor.execute(r);
         }
         CountDownLatch latch = new CountDownLatch(1);
         executor.execute(() -> latch.countDown());
         return latch.await(30, TimeUnit.SECONDS);
     }
-    
-    
+
 }
