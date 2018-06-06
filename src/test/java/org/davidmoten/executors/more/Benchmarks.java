@@ -16,35 +16,46 @@ public class Benchmarks {
 
     private static final ExecutorService executor = Executors.newFixedThreadPool(1);
 
-    private static final ExecutorService executorJuc = java.util.concurrent.Executors.newFixedThreadPool(1);
-    
+    private static final ExecutorService executorJuc = java.util.concurrent.Executors
+            .newFixedThreadPool(1);
+
     private static final ExecutorService executor2 = Executors.newFixedThreadPool(2);
 
-    private static final ExecutorService executor2Juc = java.util.concurrent.Executors.newFixedThreadPool(2);
+    private static final ExecutorService executor2Juc = java.util.concurrent.Executors
+            .newFixedThreadPool(2);
 
     @Benchmark
-    public boolean executorDoNothingManyTimesSingleThreadMore(Blackhole bh) throws InterruptedException {
+    public boolean executorDoNothingManyTimesSingleThreadMore(Blackhole bh)
+            throws InterruptedException {
         return execute(executor, bh);
     }
 
     @Benchmark
-    public boolean executorDoNothingManyTimesSingleThreadJuc(Blackhole bh) throws InterruptedException {
+    public boolean executorDoNothingManyTimesSingleThreadJuc(Blackhole bh)
+            throws InterruptedException {
         return execute(executorJuc, bh);
     }
-    
-//    @Benchmark
-    public boolean executorDoNothingManyTimesTwoThreadsMore(Blackhole bh) throws InterruptedException {
+
+    // @Benchmark
+    public boolean executorDoNothingManyTimesTwoThreadsMore(Blackhole bh)
+            throws InterruptedException {
         return execute(executor2, bh);
     }
 
-//    @Benchmark
-    public boolean executorDoNothingManyTimesTwoThreadsJuc(Blackhole bh) throws InterruptedException {
+    // @Benchmark
+    public boolean executorDoNothingManyTimesTwoThreadsJuc(Blackhole bh)
+            throws InterruptedException {
         return execute(executor2Juc, bh);
     }
 
     private boolean execute(ExecutorService executor, Blackhole bh) throws InterruptedException {
-        Runnable r = () -> {
-            bh.consume(true);
+        Runnable r = new Runnable() {
+            int count;
+            @Override
+            public void run() {
+                count++;
+                bh.consume(count);
+            }
         };
         for (int i = 0; i < 10000; i++) {
             executor.execute(r);
