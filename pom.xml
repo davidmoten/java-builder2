@@ -106,8 +106,8 @@
             <version>0.3</version>
             <scope>test</scope>
         </dependency>
-        
-         <dependency>
+
+        <dependency>
             <groupId>org.openjdk.jmh</groupId>
             <artifactId>jmh-core</artifactId>
             <version>${jmh.version}</version>
@@ -263,7 +263,7 @@
                 <password>${svn.password}</password> </configuration> </plugin> -->
         </plugins>
     </reporting>
-    
+
     <profiles>
         <profile>
             <id>benchmark</id>
@@ -296,14 +296,15 @@
                                         <classpath />
                                         <argument>org.openjdk.jmh.Main</argument>
                                         <!-- -h for help -->
+                                        <!-- <argument>-h</argument> -->
                                         <argument>-f</argument>
                                         <argument>1</argument>
                                         <argument>-i</argument>
-                                        <argument>10</argument>
+                                        <argument>20</argument>
                                         <argument>-wi</argument>
                                         <argument>4</argument>
                                         <argument>-jvmArgs</argument>
-                                        <argument>-Xmx512m</argument>
+                                        <argument>-Xmx128m</argument>
                                     </arguments>
                                 </configuration>
                             </execution>

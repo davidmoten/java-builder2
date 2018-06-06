@@ -3,13 +3,11 @@ package org.davidmoten.executors.more;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicInteger;
 
-import org.davidmoten.executors.more.Executors;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.State;
-import org.openjdk.jmh.infra.Blackhole;
 
 @State(Scope.Benchmark)
 public class Benchmarks {
@@ -25,44 +23,39 @@ public class Benchmarks {
             .newFixedThreadPool(2);
 
     @Benchmark
-    public boolean executorDoNothingManyTimesSingleThreadMore(Blackhole bh)
+    public int executorDoNothingManyTimesSingleThreadMore()
             throws InterruptedException {
-        return execute(executor, bh);
+        return execute(executor);
     }
 
     @Benchmark
-    public boolean executorDoNothingManyTimesSingleThreadJuc(Blackhole bh)
+    public int executorDoNothingManyTimesSingleThreadJuc()
             throws InterruptedException {
-        return execute(executorJuc, bh);
+        return execute(executorJuc);
     }
 
     // @Benchmark
-    public boolean executorDoNothingManyTimesTwoThreadsMore(Blackhole bh)
+    public int executorDoNothingManyTimesTwoThreadsMore()
             throws InterruptedException {
-        return execute(executor2, bh);
+        return execute(executor2);
     }
 
     // @Benchmark
-    public boolean executorDoNothingManyTimesTwoThreadsJuc(Blackhole bh)
+    public int executorDoNothingManyTimesTwoThreadsJuc()
             throws InterruptedException {
-        return execute(executor2Juc, bh);
+        return execute(executor2Juc);
     }
 
-    private boolean execute(ExecutorService executor, Blackhole bh) throws InterruptedException {
-        Runnable r = new Runnable() {
-            int count;
-            @Override
-            public void run() {
-                count++;
-                bh.consume(count);
-            }
-        };
+    private int execute(ExecutorService executor) throws InterruptedException {
+        AtomicInteger count = new AtomicInteger();
+        Runnable r = ()-> count.incrementAndGet();
         for (int i = 0; i < 10000; i++) {
             executor.execute(r);
         }
         CountDownLatch latch = new CountDownLatch(1);
         executor.execute(() -> latch.countDown());
-        return latch.await(30, TimeUnit.SECONDS);
+        latch.await(30, TimeUnit.SECONDS);
+        return count.get();
     }
 
 }
