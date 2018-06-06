@@ -32,12 +32,12 @@ public class Benchmarks {
         return execute(executorJuc);
     }
     
-    @Benchmark
+//    @Benchmark
     public boolean executorDoNothingManyTimesTwoThreadsMore(Blackhole bh) throws InterruptedException {
         return execute(executor2);
     }
 
-    @Benchmark
+//    @Benchmark
     public boolean executorDoNothingManyTimesTwoThreadsJuc(Blackhole bh) throws InterruptedException {
         return execute(executor2Juc);
     }

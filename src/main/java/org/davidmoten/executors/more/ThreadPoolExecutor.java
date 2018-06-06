@@ -494,12 +494,6 @@ public class ThreadPoolExecutor extends AbstractExecutorService {
      */
     private int largestPoolSize;
 
-    /**
-     * Counter for completed tasks. Updated only on termination of
-     * worker threads. Accessed only under mainLock.
-     */
-    private long completedTaskCount;
-
     /*
      * All user control parameters are declared as volatiles so that
      * ongoing actions are based on freshest values, but without need
@@ -621,8 +615,6 @@ public class ThreadPoolExecutor extends AbstractExecutorService {
         final Thread thread;
         /** Initial task to run.  Possibly null. */
         Runnable firstTask;
-        /** Per-thread task counter */
-        volatile long completedTasks;
 
         /**
          * Creates with given first task and thread from ThreadFactory.
@@ -1032,7 +1024,6 @@ public class ThreadPoolExecutor extends AbstractExecutorService {
         final ReentrantLock mainLock = this.mainLock;
         mainLock.lock();
         try {
-            completedTaskCount += w.completedTasks;
             workers.remove(w);
         } finally {
             mainLock.unlock();
@@ -1186,7 +1177,6 @@ public class ThreadPoolExecutor extends AbstractExecutorService {
                     }
                 } finally {
                     task = null;
-                    w.completedTasks++;
                     w.unlock();
                 }
             }
@@ -1760,52 +1750,6 @@ public class ThreadPoolExecutor extends AbstractExecutorService {
     }
 
     /**
-     * Returns the approximate total number of tasks that have ever been
-     * scheduled for execution. Because the states of tasks and
-     * threads may change dynamically during computation, the returned
-     * value is only an approximation.
-     *
-     * @return the number of tasks
-     */
-    public long getTaskCount() {
-        final ReentrantLock mainLock = this.mainLock;
-        mainLock.lock();
-        try {
-            long n = completedTaskCount;
-            for (Worker w : workers) {
-                n += w.completedTasks;
-                if (w.isLocked())
-                    ++n;
-            }
-            return n + workQueue.size();
-        } finally {
-            mainLock.unlock();
-        }
-    }
-
-    /**
-     * Returns the approximate total number of tasks that have
-     * completed execution. Because the states of tasks and threads
-     * may change dynamically during computation, the returned value
-     * is only an approximation, but one that does not ever decrease
-     * across successive calls.
-     *
-     * @return the number of tasks
-     */
-    public long getCompletedTaskCount() {
-        final ReentrantLock mainLock = this.mainLock;
-        mainLock.lock();
-        try {
-            long n = completedTaskCount;
-            for (Worker w : workers)
-                n += w.completedTasks;
-            return n;
-        } finally {
-            mainLock.unlock();
-        }
-    }
-
-    /**
      * Returns a string identifying this pool, as well as its state,
      * including indications of run state and estimated worker and
      * task counts.
@@ -1813,16 +1757,13 @@ public class ThreadPoolExecutor extends AbstractExecutorService {
      * @return a string identifying this pool, as well as its state
      */
     public String toString() {
-        long ncompleted;
         int nworkers, nactive;
         final ReentrantLock mainLock = this.mainLock;
         mainLock.lock();
         try {
-            ncompleted = completedTaskCount;
             nactive = 0;
             nworkers = workers.size();
             for (Worker w : workers) {
-                ncompleted += w.completedTasks;
                 if (w.isLocked())
                     ++nactive;
             }
@@ -1838,7 +1779,6 @@ public class ThreadPoolExecutor extends AbstractExecutorService {
             ", pool size = " + nworkers +
             ", active threads = " + nactive +
             ", queued tasks = " + workQueue.size() +
-            ", completed tasks = " + ncompleted +
             "]";
     }
 
