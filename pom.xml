@@ -300,7 +300,7 @@
                                         <argument>-f</argument>
                                         <argument>1</argument>
                                         <argument>-i</argument>
-                                        <argument>20</argument>
+                                        <argument>10</argument>
                                         <argument>-wi</argument>
                                         <argument>4</argument>
                                         <argument>-jvmArgs</argument>
