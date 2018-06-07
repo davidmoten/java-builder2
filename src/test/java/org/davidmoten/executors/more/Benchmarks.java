@@ -6,49 +6,57 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.openjdk.jmh.annotations.Benchmark;
+import org.openjdk.jmh.annotations.Level;
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.State;
+import org.openjdk.jmh.annotations.TearDown;
 
 @State(Scope.Benchmark)
 public class Benchmarks {
 
-    private static final ExecutorService executor = Executors.newFixedThreadPool(1);
+    @State(Scope.Thread)
+    public static class Execs {
 
-    private static final ExecutorService executorJuc = java.util.concurrent.Executors
-            .newFixedThreadPool(1);
+        public final ExecutorService executor = Executors.newFixedThreadPool(1);
 
-    private static final ExecutorService executor2 = Executors.newFixedThreadPool(2);
+        public final ExecutorService executorJuc = java.util.concurrent.Executors.newFixedThreadPool(1);
 
-    private static final ExecutorService executor2Juc = java.util.concurrent.Executors
-            .newFixedThreadPool(2);
+        public final ExecutorService executor2 = Executors.newFixedThreadPool(2);
 
-    @Benchmark
-    public int executorDoNothingManyTimesSingleThreadMore()
-            throws InterruptedException {
-        return execute(executor);
+        public final ExecutorService executor2Juc = java.util.concurrent.Executors.newFixedThreadPool(2);
+        
+        @TearDown(Level.Trial)
+        public void shutdown() {
+            executor.shutdown();
+            executorJuc.shutdown();
+            executor2.shutdown();
+            executor2Juc.shutdown();
+        }
     }
 
     @Benchmark
-    public int executorDoNothingManyTimesSingleThreadJuc()
-            throws InterruptedException {
-        return execute(executorJuc);
+    public int executorDoNothingManyTimesSingleThreadMore(Execs execs) throws InterruptedException {
+        return execute(execs.executor);
+    }
+
+    @Benchmark
+    public int executorDoNothingManyTimesSingleThreadJuc(Execs execs) throws InterruptedException {
+        return execute(execs.executorJuc);
     }
 
     // @Benchmark
-    public int executorDoNothingManyTimesTwoThreadsMore()
-            throws InterruptedException {
-        return execute(executor2);
+    public int executorDoNothingManyTimesTwoThreadsMore(Execs execs) throws InterruptedException {
+        return execute(execs.executor2);
     }
 
     // @Benchmark
-    public int executorDoNothingManyTimesTwoThreadsJuc()
-            throws InterruptedException {
-        return execute(executor2Juc);
+    public int executorDoNothingManyTimesTwoThreadsJuc(Execs execs) throws InterruptedException {
+        return execute(execs.executor2Juc);
     }
 
     private int execute(ExecutorService executor) throws InterruptedException {
         AtomicInteger count = new AtomicInteger();
-        Runnable r = ()-> count.incrementAndGet();
+        Runnable r = () -> count.incrementAndGet();
         for (int i = 0; i < 10000; i++) {
             executor.execute(r);
         }
