@@ -8,4 +8,10 @@ Tweaks `j.u.c.ThreadPoolExecutor` in particular.
 * remove volatile reads and writes of `completedTasks` (and associated unused methods)
 
 ## Benchmark results
-The theoretical benefits are so far lost in the noise so far I'm afraid!`
+On Ubuntu 16.04 AWS t2.xlarge there is a 10% throughput boost on a single thread:
+
+```java
+Benchmark                                               Mode  Cnt    Score   Error  Units
+Benchmarks.executorDoNothingManyTimesSingleThreadJuc   thrpt   10  308.426 ± 2.141  ops/s
+Benchmarks.executorDoNothingManyTimesSingleThreadMore  thrpt   10  338.532 ± 1.606  ops/s
+```
