@@ -4,6 +4,7 @@ import java.io.OutputStream;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class Generator {
@@ -32,7 +33,8 @@ public class Generator {
 
         private final String pkg;
         private String className;
-        public final List<Field> fields = new ArrayList<>();
+        final List<Field> fields = new ArrayList<>();
+        final List<String> imports = new ArrayList<>();
 
         Builder(String pkg) {
             this.pkg = pkg;
@@ -52,6 +54,15 @@ public class Generator {
             this.b = b;
         }
 
+        public Builder2 imports(Class<?> cls) {
+            return imports(cls.getName());
+        }
+
+        public Builder2 imports(String cls) {
+            b.imports.add(cls);
+            return this;
+        }
+
         Builder3 type(String type) {
             return new Builder3(this, type);
         }
@@ -59,13 +70,51 @@ public class Generator {
         public void generate(OutputStream os) {
             try (PrintStream out = new PrintStream(os)) {
                 out.format("package %s;\n\n", b.pkg);
+
+                for (String imp : b.imports) {
+                    out.format("import %s;\n", imp);
+                }
+                out.println();
                 out.format("public final class %s {\n\n", b.className);
+
+                // write private final fields
+                out.println(b.fields.stream().map(f -> "    private final " + f.type + " " + f.name + ";")
+                        .collect(Collectors.joining("\n")));
+                out.println();
+
+                // write constructor
+                String constructorParameters = b.fields.stream().map(f -> f.type + " " + f.name)
+                        .collect(Collectors.joining(", "));
+                out.format("    private %s(%s) {\n", b.className, constructorParameters);
+                String constructorAssignments = b.fields.stream()
+                        .map(f -> "        this." + f.name + " = " + f.name + ";").collect(Collectors.joining("\n"));
+                out.println(constructorAssignments);
+                out.format("    }\n\n");
+
+                // write getters
+                for (Field f : b.fields) {
+                    out.format("    public %s %s() {\n", f.type, f.name);
+                    out.format("        return %s;\n", f.name);
+                    out.format("    }\n\n");
+                }
+
+                // write builders
                 List<Field> mandatory = b.fields.stream().filter(f -> f.mandatory).collect(Collectors.toList());
                 List<Field> nonMandatory = b.fields.stream().filter(f -> !f.mandatory).collect(Collectors.toList());
                 int n = 1;
                 for (int i = 0; i < mandatory.size(); i++) {
                     out.format("    public static final class Builder%s {\n\n", n);
                     if (n == 1) {
+                        for (Field field : b.fields) {
+                            String d;
+                            if (field.defaultValue != null) {
+                                d = " = " + field.defaultValue;
+                            } else {
+                                d = "";
+                            }
+                            out.format("        private %s %s%s;\n", field.type, field.name, d);
+                        }
+                        out.println();
                         out.format("        Builder%s(){\n", n);
                     } else {
                         out.format("        private final Builder1 b;\n\n");
@@ -74,26 +123,60 @@ public class Generator {
                     }
                     out.format("        }\n\n");
                     Field f = mandatory.get(i);
-                    if (i < mandatory.size() - 1 || !!nonMandatory.isEmpty()) {
+                    if (i < mandatory.size() - 1 || !nonMandatory.isEmpty()) {
                         out.format("        public Builder%s %s(%s %s) {\n", n + 1, f.name, f.type, f.name);
-                        out.format("            b.%s = %s;\n", f.name, f.name);
-                        out.format("            return new Builder%s(b);\n", n + 1);
+                        if (n == 1) {
+                            out.format("            this.%s = %s;\n", f.name, f.name);
+                        } else {
+                            out.format("            b.%s = %s;\n", f.name, f.name);
+                        }
+                        if (n == 1) {
+                            out.format("            return new Builder%s(this);\n", n + 1);
+                        } else {
+                            out.format("            return new Builder%s(b);\n", n + 1);
+                        }
                         out.format("        }\n\n");
                     } else {
                         out.format("        public %s %s(%s %s) {\n", b.className, f.name, f.type, f.name);
                         out.format("            b.%s = %s;\n", f.name, f.name);
-                        out.format("            return new %s();\n", b.className);
+                        out.format("            return new %s(%s);\n", b.className, parameters());
                         out.format("        }\n\n");
-
                     }
-                    n++;
                     out.format("    }\n\n");
+                    n++;
+                }
+                // add nonMandatory builder
+                if (!nonMandatory.isEmpty()) {
+                    out.format("    public static final class Builder%s {\n", n);
+                    out.println();
+                    out.format("        private final Builder1 b;\n");
+                    out.println();
+                    out.format("        Builder%s(Builder1 b) {\n", n);
+                    out.format("             this.b = b;\n");
+                    out.format("        }\n");
+
+                    for (Field m : nonMandatory) {
+                        out.format("\n");
+                        out.format("        public Builder%s %s(%s %s) {\n", n, m.name, m.type, m.name);
+                        out.format("            b.%s = %s;\n", m.name, m.name);
+                        out.format("            return this;\n");
+                        out.format("        }\n");
+                    }
+
+                    out.format("\n        public %s build() {\n", b.className);
+                    out.format("            return new %s(%s);\n", b.className, parameters());
+                    out.format("        }\n");
+
+                    out.format("    }\n");
                 }
                 out.format("}");
-
-                // add nonMandatory builder
             }
         }
+
+        private String parameters() {
+            return b.fields.stream().map(x -> "b." + x.name).collect(Collectors.joining(", "));
+        }
+
     }
 
     public static final class Builder3 {
@@ -148,9 +231,11 @@ public class Generator {
 
     public static void main(String[] args) {
         Generator.pkg("au.gov.amsa").className("Person") //
+                .imports(Optional.class) //
                 .type("String").name("firstName").mandatory().entryMethod().build() //
                 .type("String").name("lastName").mandatory().build() //
                 .type("Optional<Integer>").name("age").build() //
+                .type("Optional<String>").name("nickname").build() //
                 .generate(System.out);
     }
 
