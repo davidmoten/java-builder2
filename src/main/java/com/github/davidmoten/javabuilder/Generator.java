@@ -1,5 +1,8 @@
 package com.github.davidmoten.javabuilder;
 
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.util.ArrayList;
@@ -65,6 +68,16 @@ public class Generator {
 
         public Builder3 type(String type) {
             return new Builder3(this, type);
+        }
+        
+        public void generate(String filename) {
+            try (OutputStream os = new FileOutputStream(filename)) {
+                generate(os);
+            } catch (FileNotFoundException e) {
+                throw new RuntimeException(e);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
         }
 
         public void generate(OutputStream os) {
