@@ -2,15 +2,12 @@ package com.github.davidmoten.javabuilder;
 
 import static org.junit.Assert.assertEquals;
 
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Optional;
 
 import org.junit.Test;
-
-import com.github.davidmoten.javabuilder.Generator;
 
 public class PersonTest {
 
