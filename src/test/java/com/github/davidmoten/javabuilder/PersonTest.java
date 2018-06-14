@@ -3,7 +3,6 @@ package com.github.davidmoten.javabuilder;
 import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
-import java.util.Optional;
 
 import org.junit.Test;
 
@@ -13,12 +12,13 @@ public class PersonTest {
     public void replacePersonClass() throws IOException {
         Generator.pkg("com.github.davidmoten.javabuilder") //
                 .className("Person") //
-                .imports(Optional.class) //
                 .type("String").name("firstName").mandatory().entryMethod().build() //
                 .type("String").name("lastName").mandatory().build() //
                 .type("Integer").name("age").build() //
+                .type("int").name("height").defaultValue("0").build() //
                 .type("String").name("nickname").defaultValue("\"bucko\"").build() //
-                .generate("src/test/java/com/github/davidmoten/javabuilder/Person.java");
+                .generate("src/test/java/com/github/davidmoten/javabuilder") //
+                .generate();
     }
 
     @Test

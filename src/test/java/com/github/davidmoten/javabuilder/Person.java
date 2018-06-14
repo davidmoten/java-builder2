@@ -7,13 +7,15 @@ public final class Person {
 
     private final String firstName;
     private final String lastName;
-    private final Integer age;
+    private final Optional<Integer> age;
+    private final int height;
     private final String nickname;
 
-    private Person(String firstName, String lastName, Integer age, String nickname) {
+    private Person(String firstName, String lastName, Optional<Integer> age, int height, String nickname) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.age = age;
+        this.height = height;
         this.nickname = nickname;
     }
 
@@ -30,7 +32,11 @@ public final class Person {
     }
 
     public Optional<Integer> age() {
-        return Optional.ofNullable(age);
+        return age;
+    }
+
+    public int height() {
+        return height;
     }
 
     public String nickname() {
@@ -41,13 +47,15 @@ public final class Person {
 
         private String firstName;
         private String lastName;
-        private Integer age;
+        private Optional<Integer> age;
+        private int height = 0;
         private String nickname = "bucko";
 
         Builder1(){
         }
 
         public Builder2 firstName(String firstName) {
+            notNull(firstName, "firstName");
             this.firstName = firstName;
             return new Builder2(this);
         }
@@ -63,6 +71,7 @@ public final class Person {
         }
 
         public Builder3 lastName(String lastName) {
+            notNull(lastName, "lastName");
             b.lastName = lastName;
             return new Builder3(b);
         }
@@ -77,18 +86,32 @@ public final class Person {
              this.b = b;
         }
 
-        public Builder3 age(Integer age) {
-            b.age = age;
+        public Builder3 age(int age) {
+            notNull(age, "age");
+            b.age = Optional.of(age);
+            return this;
+        }
+
+        public Builder3 height(int height) {
+            notNull(height, "height");
+            b.height = height;
             return this;
         }
 
         public Builder3 nickname(String nickname) {
+            notNull(nickname, "nickname");
             b.nickname = nickname;
             return this;
         }
 
         public Person build() {
-            return new Person(b.firstName, b.lastName, b.age, b.nickname);
+            return new Person(b.firstName, b.lastName, b.age, b.height, b.nickname);
+        }
+    }
+
+    private static void notNull(Object o, String name) {
+        if (o == null) {
+            throw new NullPointerException(name + " cannot be null");
         }
     }
 }

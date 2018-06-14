@@ -1,10 +1,14 @@
 package com.github.davidmoten.javabuilder;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -69,18 +73,31 @@ public class Generator {
         public Builder3 type(String type) {
             return new Builder3(this, type);
         }
-        
-        public void generate(String filename) {
-            try (OutputStream os = new FileOutputStream(filename)) {
+
+        public GeneratorMore generate(String directory) {
+            try (OutputStream os = new FileOutputStream(directory + File.separator + b.className + ".java")) {
                 generate(os);
             } catch (FileNotFoundException e) {
                 throw new RuntimeException(e);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
+            return new GeneratorMore(this);
         }
 
-        public void generate(OutputStream os) {
+        public GeneratorMore generate() {
+            ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+            generate(bytes);
+            try {
+                Files.write(new File("target" + File.separator + b.className + ".java").toPath(), bytes.toByteArray());
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            System.out.println(new String(bytes.toByteArray(), StandardCharsets.UTF_8));
+            return new GeneratorMore(this);
+        }
+
+        public GeneratorMore generate(OutputStream os) {
             try (PrintStream out = new PrintStream(os)) {
                 // write builders
                 List<Field> mandatory = b.fields.stream().filter(f -> f.mandatory).collect(Collectors.toList());
@@ -88,7 +105,9 @@ public class Generator {
 
                 out.format("package %s;\n\n", b.pkg);
 
-                out.println("import java.util.Optional;\n");
+                if (!nonMandatory.isEmpty()) {
+                    out.println("import java.util.Optional;\n");
+                }
                 for (String imp : b.imports) {
                     if (!"java.util.Optional".equals(imp)) {
                         out.format("import %s;\n", imp);
@@ -98,12 +117,12 @@ public class Generator {
                 out.format("public final class %s {\n\n", b.className);
 
                 // write private final fields
-                out.println(b.fields.stream().map(f -> "    private final " + f.type + " " + f.name + ";")
+                out.println(b.fields.stream().map(f -> "    private final " + declaredType(f) + " " + f.name + ";")
                         .collect(Collectors.joining("\n")));
                 out.println();
 
                 // write constructor
-                String constructorParameters = b.fields.stream().map(f -> f.type + " " + f.name)
+                String constructorParameters = b.fields.stream().map(f -> declaredType(f) + " " + f.name)
                         .collect(Collectors.joining(", "));
                 out.format("    private %s(%s) {\n", b.className, constructorParameters);
                 String constructorAssignments = b.fields.stream()
@@ -117,15 +136,9 @@ public class Generator {
 
                 // write getters
                 for (Field f : b.fields) {
-                    if (f.mandatory || f.defaultValue != null) {
-                        out.format("    public %s %s() {\n", f.type, f.name);
-                        out.format("        return %s;\n", f.name);
-                        out.format("    }\n\n");
-                    } else {
-                        out.format("    public Optional<%s> %s() {\n", f.type, f.name);
-                        out.format("        return Optional.ofNullable(%s);\n", f.name);
-                        out.format("    }\n\n");
-                    }
+                    out.format("    public %s %s() {\n", declaredType(f), f.name);
+                    out.format("        return %s;\n", f.name);
+                    out.format("    }\n\n");
                 }
 
                 int n = 1;
@@ -139,7 +152,7 @@ public class Generator {
                             } else {
                                 d = "";
                             }
-                            out.format("        private %s %s%s;\n", field.type, field.name, d);
+                            out.format("        private %s %s%s;\n", declaredType(field), field.name, d);
                         }
                         out.println();
                         out.format("        Builder%s(){\n", n);
@@ -151,7 +164,9 @@ public class Generator {
                     out.format("        }\n\n");
                     Field f = mandatory.get(i);
                     if (i < mandatory.size() - 1 || !nonMandatory.isEmpty()) {
-                        out.format("        public Builder%s %s(%s %s) {\n", n + 1, f.name, f.type, f.name);
+                        out.format("        public Builder%s %s(%s %s) {\n", n + 1, f.name, parameterType(f.type),
+                                f.name);
+                        out.format("            notNull(%s, \"%s\");\n", f.name, f.name);
                         if (n == 1) {
                             out.format("            this.%s = %s;\n", f.name, f.name);
                         } else {
@@ -164,7 +179,9 @@ public class Generator {
                         }
                         out.format("        }\n\n");
                     } else {
-                        out.format("        public %s %s(%s %s) {\n", b.className, f.name, f.type, f.name);
+                        out.format("        public %s %s(%s %s) {\n", b.className, f.name, parameterType(f.type),
+                                f.name);
+                        out.format("            notNull(%s, \"%s\");\n", f.name, f.name);
                         out.format("            b.%s = %s;\n", f.name, f.name);
                         out.format("            return new %s(%s);\n", b.className, parameters());
                         out.format("        }\n\n");
@@ -184,8 +201,13 @@ public class Generator {
 
                     for (Field m : nonMandatory) {
                         out.format("\n");
-                        out.format("        public Builder%s %s(%s %s) {\n", n, m.name, m.type, m.name);
-                        out.format("            b.%s = %s;\n", m.name, m.name);
+                        out.format("        public Builder%s %s(%s %s) {\n", n, m.name, parameterType(m.type), m.name);
+                        out.format("            notNull(%s, \"%s\");\n", m.name, m.name);
+                        if (m.mandatory || m.defaultValue != null) {
+                            out.format("            b.%s = %s;\n", m.name, m.name);
+                        } else {
+                            out.format("            b.%s = Optional.of(%s);\n", m.name, m.name);
+                        }
                         out.format("            return this;\n");
                         out.format("        }\n");
                     }
@@ -196,7 +218,15 @@ public class Generator {
 
                     out.format("    }\n");
                 }
+
+                out.println();
+                out.format("    private static void notNull(Object o, String name) {\n");
+                out.format("        if (o == null) {\n");
+                out.format("            throw new NullPointerException(name + \" cannot be null\");\n");
+                out.format("        }\n");
+                out.format("    }\n");
                 out.format("}");
+                return new GeneratorMore(this);
             }
         }
 
@@ -204,6 +234,53 @@ public class Generator {
             return b.fields.stream().map(x -> "b." + x.name).collect(Collectors.joining(", "));
         }
 
+    }
+
+    private static String declaredType(Field f) {
+        if (f.mandatory || f.defaultValue != null) {
+            return f.type;
+        } else {
+            return "Optional<" + f.type + ">";
+        }
+    }
+
+    private static String parameterType(String type) {
+        if (type.equals("Integer")) {
+            return "int";
+        } else if (type.equals("Double")) {
+            return "double";
+        } else if (type.equals("Short")) {
+            return "short";
+        } else if (type.equals("Boolean")) {
+            return "boolean";
+        } else if (type.equals("Long")) {
+            return "long";
+        } else {
+            return type;
+        }
+    }
+
+    public static final class GeneratorMore {
+        private final Builder2 b;
+
+        GeneratorMore(Builder2 b) {
+            this.b = b;
+        }
+
+        public GeneratorMore generate() {
+            b.generate();
+            return this;
+        }
+
+        public GeneratorMore generate(OutputStream os) {
+            b.generate(os);
+            return this;
+        }
+
+        public GeneratorMore generate(String directory) {
+            b.generate(directory);
+            return this;
+        }
     }
 
     public static final class Builder3 {
@@ -254,16 +331,6 @@ public class Generator {
             return b.b;
         }
 
-    }
-
-    public static void main(String[] args) {
-        Generator.pkg("au.gov.amsa").className("Person") //
-                .imports(Optional.class) //
-                .type("String").name("firstName").mandatory().entryMethod().build() //
-                .type("String").name("lastName").mandatory().build() //
-                .type("Integer").name("age").build() //
-                .type("String").name("nickname").defaultValue("\"bucko\"").build() //
-                .generate(System.out);
     }
 
 }
