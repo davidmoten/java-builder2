@@ -1,19 +1,24 @@
-package au.gov.amsa;
+package com.github.davidmoten.javabuilder;
 
 import java.util.Optional;
+
 
 public final class Person {
 
     private final String firstName;
     private final String lastName;
-    private final Optional<Integer> age;
-    private final Optional<String> nickname;
+    private final Integer age;
+    private final String nickname;
 
-    private Person(String firstName, String lastName, Optional<Integer> age, Optional<String> nickname) {
+    private Person(String firstName, String lastName, Integer age, String nickname) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.age = age;
         this.nickname = nickname;
+    }
+
+    public static Builder1 builder() {
+        return new Builder1();
     }
 
     public String firstName() {
@@ -25,10 +30,10 @@ public final class Person {
     }
 
     public Optional<Integer> age() {
-        return age;
+        return Optional.ofNullable(age);
     }
 
-    public Optional<String> nickname() {
+    public String nickname() {
         return nickname;
     }
 
@@ -36,8 +41,8 @@ public final class Person {
 
         private String firstName;
         private String lastName;
-        private Optional<Integer> age;
-        private Optional<String> nickname;
+        private Integer age;
+        private String nickname = "bucko";
 
         Builder1(){
         }
@@ -72,12 +77,12 @@ public final class Person {
              this.b = b;
         }
 
-        public Builder3 age(Optional<Integer> age) {
+        public Builder3 age(Integer age) {
             b.age = age;
             return this;
         }
 
-        public Builder3 nickname(Optional<String> nickname) {
+        public Builder3 nickname(String nickname) {
             b.nickname = nickname;
             return this;
         }

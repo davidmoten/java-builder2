@@ -63,16 +63,23 @@ public class Generator {
             return this;
         }
 
-        Builder3 type(String type) {
+        public Builder3 type(String type) {
             return new Builder3(this, type);
         }
 
         public void generate(OutputStream os) {
             try (PrintStream out = new PrintStream(os)) {
+                // write builders
+                List<Field> mandatory = b.fields.stream().filter(f -> f.mandatory).collect(Collectors.toList());
+                List<Field> nonMandatory = b.fields.stream().filter(f -> !f.mandatory).collect(Collectors.toList());
+
                 out.format("package %s;\n\n", b.pkg);
 
+                out.println("import java.util.Optional;\n");
                 for (String imp : b.imports) {
-                    out.format("import %s;\n", imp);
+                    if (!"java.util.Optional".equals(imp)) {
+                        out.format("import %s;\n", imp);
+                    }
                 }
                 out.println();
                 out.format("public final class %s {\n\n", b.className);
@@ -91,16 +98,23 @@ public class Generator {
                 out.println(constructorAssignments);
                 out.format("    }\n\n");
 
+                out.println("    public static Builder1 builder() {");
+                out.println("        return new Builder1();");
+                out.println("    }\n");
+
                 // write getters
                 for (Field f : b.fields) {
-                    out.format("    public %s %s() {\n", f.type, f.name);
-                    out.format("        return %s;\n", f.name);
-                    out.format("    }\n\n");
+                    if (f.mandatory || f.defaultValue != null) {
+                        out.format("    public %s %s() {\n", f.type, f.name);
+                        out.format("        return %s;\n", f.name);
+                        out.format("    }\n\n");
+                    } else {
+                        out.format("    public Optional<%s> %s() {\n", f.type, f.name);
+                        out.format("        return Optional.ofNullable(%s);\n", f.name);
+                        out.format("    }\n\n");
+                    }
                 }
 
-                // write builders
-                List<Field> mandatory = b.fields.stream().filter(f -> f.mandatory).collect(Collectors.toList());
-                List<Field> nonMandatory = b.fields.stream().filter(f -> !f.mandatory).collect(Collectors.toList());
                 int n = 1;
                 for (int i = 0; i < mandatory.size(); i++) {
                     out.format("    public static final class Builder%s {\n\n", n);
@@ -234,8 +248,8 @@ public class Generator {
                 .imports(Optional.class) //
                 .type("String").name("firstName").mandatory().entryMethod().build() //
                 .type("String").name("lastName").mandatory().build() //
-                .type("Optional<Integer>").name("age").build() //
-                .type("Optional<String>").name("nickname").build() //
+                .type("Integer").name("age").build() //
+                .type("String").name("nickname").defaultValue("\"bucko\"").build() //
                 .generate(System.out);
     }
 
