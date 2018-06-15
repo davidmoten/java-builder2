@@ -22,8 +22,20 @@ Add this maven dependency to your pom.xml:
 Normally you'll add it as a test scoped dependency.
 
 ## Usage
+The code below (put in a unit test or a main method in a test class) generates a [`Person`](src/test/java/com/github/davidmoten/javabuilder/Person.java) class in the `target` directory *and* prints it to stdout.
 
-
+```java
+Generator
+  .pkg("com.github.davidmoten.javabuilder") //
+  .className("Person") //
+  .type("String").name("firstName").mandatory().entryMethod().build() //
+  .type("String").name("lastName").mandatory().build() //
+  .type("Integer").name("age").build() //
+  .type("int").name("height").defaultValue("0").build() //
+  .type("String").name("nickname").defaultValue("\"bucko\"").build() //
+  .generate();
+```
+There are other overloads of `generate` to write the class to a directory or an `OutputStream`. You can chain `generate` calls to do all of those things if you want.
 
 ## Building
 ```bash
