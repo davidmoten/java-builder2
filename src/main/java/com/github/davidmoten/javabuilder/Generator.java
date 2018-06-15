@@ -11,10 +11,13 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
-public class Generator {
+public final class Generator {
+    
+    private Generator() {
+        // prevent instantiation
+    }
 
     public static final class Field {
         private final String type;
