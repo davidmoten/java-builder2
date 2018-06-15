@@ -12,6 +12,11 @@ public final class Person {
     private final String nickname;
 
     private Person(String firstName, String lastName, Optional<Integer> age, int height, String nickname) {
+        notNull(firstName, "firstName");
+        notNull(lastName, "lastName");
+        notNull(age, "age");
+        notNull(height, "height");
+        notNull(nickname, "nickname");
         this.firstName = firstName;
         this.lastName = lastName;
         this.age = age;
@@ -47,7 +52,7 @@ public final class Person {
 
         private String firstName;
         private String lastName;
-        private Optional<Integer> age;
+        private Optional<Integer> age = Optional.empty();
         private int height = 0;
         private String nickname = "bucko";
 

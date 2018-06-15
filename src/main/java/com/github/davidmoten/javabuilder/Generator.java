@@ -125,8 +125,17 @@ public class Generator {
                 String constructorParameters = b.fields.stream().map(f -> declaredType(f) + " " + f.name)
                         .collect(Collectors.joining(", "));
                 out.format("    private %s(%s) {\n", b.className, constructorParameters);
+
+                // write null checks
+                String notNulls = b.fields.stream()
+                        .map(f -> String.format("        notNull(%s, \"%s\");", f.name, f.name))
+                        .collect(Collectors.joining("\n"));
+                out.println(notNulls);
+
+                // write field assignments
                 String constructorAssignments = b.fields.stream()
-                        .map(f -> "        this." + f.name + " = " + f.name + ";").collect(Collectors.joining("\n"));
+                        .map(f -> "        this." + f.name + " = " + f.name + ";") //
+                        .collect(Collectors.joining("\n"));
                 out.println(constructorAssignments);
                 out.format("    }\n\n");
 
@@ -145,15 +154,7 @@ public class Generator {
                 for (int i = 0; i < mandatory.size(); i++) {
                     out.format("    public static final class Builder%s {\n\n", n);
                     if (n == 1) {
-                        for (Field field : b.fields) {
-                            String d;
-                            if (field.defaultValue != null) {
-                                d = " = " + field.defaultValue;
-                            } else {
-                                d = "";
-                            }
-                            out.format("        private %s %s%s;\n", declaredType(field), field.name, d);
-                        }
+                        writeBuilder1Fields(out);
                         out.println();
                         out.format("        Builder%s(){\n", n);
                     } else {
@@ -193,33 +194,46 @@ public class Generator {
                 if (!nonMandatory.isEmpty()) {
                     out.format("    public static final class Builder%s {\n", n);
                     out.println();
-                    out.format("        private final Builder1 b;\n");
+                    if (mandatory.isEmpty()) {
+                        writeBuilder1Fields(out);
+                    } else {
+                        out.format("        private final Builder1 b;\n");
+                    }
                     out.println();
-                    out.format("        Builder%s(Builder1 b) {\n", n);
-                    out.format("             this.b = b;\n");
-                    out.format("        }\n");
-
+                    if (mandatory.isEmpty()) {
+                        out.format("        Builder%s() {\n", n);
+                        out.format("        }\n");
+                    } else {
+                        out.format("        Builder%s(Builder1 b) {\n", n);
+                        out.format("             this.b = b;\n");
+                        out.format("        }\n");
+                    }
                     for (Field m : nonMandatory) {
                         out.format("\n");
                         out.format("        public Builder%s %s(%s %s) {\n", n, m.name, parameterType(m.type), m.name);
                         out.format("            notNull(%s, \"%s\");\n", m.name, m.name);
-                        if (m.mandatory || m.defaultValue != null) {
-                            out.format("            b.%s = %s;\n", m.name, m.name);
+                        final String field;
+                        if (mandatory.isEmpty()) {
+                            field = "this";
                         } else {
-                            out.format("            b.%s = Optional.of(%s);\n", m.name, m.name);
+                            field = "b";
+                        }
+                        if (m.defaultValue != null) {
+                            out.format("            %s.%s = %s;\n", field, m.name, m.name);
+                        } else {
+                            out.format("            %s.%s = Optional.of(%s);\n", field, m.name, m.name);
                         }
                         out.format("            return this;\n");
                         out.format("        }\n");
                     }
 
                     out.format("\n        public %s build() {\n", b.className);
-                    out.format("            return new %s(%s);\n", b.className, parameters());
+                    out.format("            return new %s(%s);\n", b.className, parameters(mandatory.isEmpty()));
                     out.format("        }\n");
 
-                    out.format("    }\n");
+                    out.format("    }\n\n");
                 }
 
-                out.println();
                 out.format("    private static void notNull(Object o, String name) {\n");
                 out.format("        if (o == null) {\n");
                 out.format("            throw new NullPointerException(name + \" cannot be null\");\n");
@@ -230,8 +244,27 @@ public class Generator {
             }
         }
 
+        private void writeBuilder1Fields(PrintStream out) {
+            for (Field field : b.fields) {
+                String d;
+                if (field.defaultValue != null) {
+                    d = " = " + field.defaultValue;
+                } else if (!field.mandatory) {
+                    d = " = Optional.empty()";
+                } else {
+                    d = "";
+                }
+                out.format("        private %s %s%s;\n", declaredType(field), field.name, d);
+            }
+        }
+
         private String parameters() {
-            return b.fields.stream().map(x -> "b." + x.name).collect(Collectors.joining(", "));
+            return parameters(false);
+        }
+
+        private String parameters(boolean useThis) {
+            final String field = useThis ? "this" : "b";
+            return b.fields.stream().map(x -> field + "." + x.name).collect(Collectors.joining(", "));
         }
 
     }
