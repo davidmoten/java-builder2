@@ -28,6 +28,10 @@ public final class Person {
         return new Builder1();
     }
 
+    public static Builder2 firstName(String firstName) {
+;        return builder().firstName(firstName);
+    }
+
     public String firstName() {
         return firstName;
     }

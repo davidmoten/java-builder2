@@ -146,6 +146,15 @@ public final class Generator {
                 out.println("        return new Builder1();");
                 out.println("    }\n");
 
+                if (!mandatory.isEmpty()) {
+                    Field f = mandatory.get(0);
+                    if (f.isEntryMethod) {
+                        out.format("    public static Builder2 %s(%s %s) {\n;", f.name, parameterType(f.type), f.name);
+                        out.format("        return builder().%s(%s);\n", f.name,f .name);
+                        out.format("    }\n\n");
+                    }
+                }
+                
                 // write getters
                 for (Field f : b.fields) {
                     out.format("    public %s %s() {\n", declaredType(f), f.name);

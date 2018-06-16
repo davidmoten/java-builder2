@@ -35,6 +35,16 @@ public class GeneratorTest {
     }
 
     @Test
+    public void testPersonBuilder() {
+        Person p = Person.builder().firstName("dave").lastName("moten").nickname("bucko").age(23)
+                .build();
+        assertEquals("dave", p.firstName());
+        assertEquals("moten", p.lastName());
+        assertEquals("bucko", p.nickname());
+        assertEquals(23, (int) p.age().get());
+    }
+
+    @Test
     public void replacePerson2ClassNoMandatory() throws IOException {
         Generator.pkg("com.github.davidmoten.javabuilder") //
                 .className("Person2") //
@@ -42,15 +52,6 @@ public class GeneratorTest {
                 .type("String").name("lastName").build() //
                 .generate("src/test/java/com/github/davidmoten/javabuilder") //
                 .generate();
-    }
-
-    @Test
-    public void testPersonBuilder() {
-        Person p = Person.builder().firstName("dave").lastName("moten").nickname("bucko").age(23).build();
-        assertEquals("dave", p.firstName());
-        assertEquals("moten", p.lastName());
-        assertEquals("bucko", p.nickname());
-        assertEquals(23, (int) p.age().get());
     }
 
     @Test
@@ -76,13 +77,12 @@ public class GeneratorTest {
                 .generate("src/test/java/com/github/davidmoten/javabuilder") //
                 .generate();
     }
-    
+
     @Test
     public void testPerson3Builder() {
         Person3 p = Person3.builder().firstName("dave").lastName("moten");
         assertEquals("dave", p.firstName());
-        assertEquals("moten",p.lastName());
+        assertEquals("moten", p.lastName());
     }
 
-    
 }
