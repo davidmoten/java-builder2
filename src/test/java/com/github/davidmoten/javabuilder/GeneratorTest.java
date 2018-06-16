@@ -79,8 +79,9 @@ public class GeneratorTest {
     
     @Test
     public void testPerson3Builder() {
-        Person3.builder().firstName("dave").lastName("moten");
-        Assert.fail();
+        Person3 p = Person3.builder().firstName("dave").lastName("moten");
+        assertEquals("dave", p.firstName());
+        assertEquals("moten",p.lastName());
     }
 
     

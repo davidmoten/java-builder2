@@ -10,13 +10,13 @@
         <artifactId>sonatype-parent</artifactId>
         <version>0.1</version>
     </parent>
-    <artifactId>more-executors</artifactId>
+    <artifactId>java-builder2</artifactId>
     <version>0.1-SNAPSHOT</version>
     <name>${project.artifactId}</name>
     <description>RxJava 2 utilities for AWS</description>
     <packaging>jar</packaging>
 
-    <url>http://github.com/davidmoten/more-executors</url>
+    <url>http://github.com/davidmoten/java-builder2</url>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -54,12 +54,12 @@
 
     <ciManagement>
         <system>Travis</system>
-        <url>https://travis-ci.org/davidmoten/more-executors</url>
+        <url>https://travis-ci.org/davidmoten/java-builder2</url>
     </ciManagement>
 
     <issueManagement>
         <system>GitHub</system>
-        <url>https://github.com/davidmoten/more-executors/issues</url>
+        <url>https://github.com/davidmoten/java-builder2/issues</url>
     </issueManagement>
 
     <inceptionYear>2018</inceptionYear>
@@ -77,9 +77,9 @@
     </developers>
 
     <scm>
-        <connection>scm:git:https://github.com/davidmoten/more-executors.git</connection>
-        <developerConnection>scm:git:https://github.com/davidmoten/more-executors.git</developerConnection>
-        <url>scm:git:https://github.com:davidmoten/more-executors.git</url>
+        <connection>scm:git:https://github.com/davidmoten/java-builder2.git</connection>
+        <developerConnection>scm:git:https://github.com/davidmoten/java-builder2.git</developerConnection>
+        <url>scm:git:https://github.com:davidmoten/java-builder2.git</url>
         <tag>HEAD</tag>
     </scm>
 
@@ -107,20 +107,6 @@
             <scope>test</scope>
         </dependency>
 
-        <dependency>
-            <groupId>org.openjdk.jmh</groupId>
-            <artifactId>jmh-core</artifactId>
-            <version>${jmh.version}</version>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.openjdk.jmh</groupId>
-            <artifactId>jmh-generator-annprocess</artifactId>
-            <version>${jmh.version}</version>
-            <scope>test</scope>
-        </dependency>
-
     </dependencies>
 
     <build>
@@ -140,7 +126,7 @@
                 <configuration>
                     <archive>
                         <manifestEntries>
-                            <Automatic-Module-Name>com.github.davidmoten.moreexecutors</Automatic-Module-Name>
+                            <Automatic-Module-Name>com.github.davidmoten.javabuilder2</Automatic-Module-Name>
                         </manifestEntries>
                     </archive>
                 </configuration>
@@ -264,55 +250,5 @@
         </plugins>
     </reporting>
 
-    <profiles>
-        <profile>
-            <id>benchmark</id>
-            <dependencies>
-                <dependency>
-                    <groupId>org.openjdk.jmh</groupId>
-                    <artifactId>jmh-generator-annprocess</artifactId>
-                    <version>${jmh.version}</version>
-                    <scope>test</scope>
-                </dependency>
-            </dependencies>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.codehaus.mojo</groupId>
-                        <artifactId>exec-maven-plugin</artifactId>
-                        <version>${exec.version}</version>
-                        <executions>
-                            <execution>
-                                <id>run-benchmarks</id>
-                                <phase>integration-test</phase>
-                                <goals>
-                                    <goal>exec</goal>
-                                </goals>
-                                <configuration>
-                                    <classpathScope>test</classpathScope>
-                                    <executable>java</executable>
-                                    <arguments>
-                                        <argument>-classpath</argument>
-                                        <classpath />
-                                        <argument>org.openjdk.jmh.Main</argument>
-                                        <!-- -h for help -->
-                                        <!-- <argument>-h</argument> -->
-                                        <argument>-f</argument>
-                                        <argument>1</argument>
-                                        <argument>-i</argument>
-                                        <argument>10</argument>
-                                        <argument>-wi</argument>
-                                        <argument>4</argument>
-                                        <argument>-jvmArgs</argument>
-                                        <argument>-Xmx128m</argument>
-                                    </arguments>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
-
+    
 </project>
