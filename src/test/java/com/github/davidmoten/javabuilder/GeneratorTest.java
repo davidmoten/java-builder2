@@ -5,7 +5,6 @@ import static org.junit.Assert.assertFalse;
 
 import java.io.IOException;
 
-import org.junit.Assert;
 import org.junit.Test;
 
 public class GeneratorTest {
@@ -48,15 +47,15 @@ public class GeneratorTest {
     public void replacePerson2ClassNoMandatory() throws IOException {
         Generator.pkg("com.github.davidmoten.javabuilder") //
                 .className("Person2") //
-                .type("String").name("firstName").build() //
-                .type("String").name("lastName").build() //
+                .type("String").name("firstName").entryMethod().build() //
+                .type("String").name("lastName").entryMethod().build() //
                 .generate("src/test/java/com/github/davidmoten/javabuilder") //
                 .generate();
     }
 
     @Test
     public void testPerson2Builder() {
-        Person2 p = Person2.builder().firstName("dave").lastName("moten").build();
+        Person2 p = Person2.firstName("dave").lastName("moten").build();
         assertEquals("dave", p.firstName().get());
         assertEquals("moten", p.lastName().get());
     }

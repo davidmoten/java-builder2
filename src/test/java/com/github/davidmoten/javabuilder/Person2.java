@@ -19,6 +19,14 @@ public final class Person2 {
         return new Builder1();
     }
 
+    public static Builder1 firstName(String firstName) {
+;        return builder().firstName(firstName);
+    }
+
+    public static Builder1 lastName(String lastName) {
+;        return builder().lastName(lastName);
+    }
+
     public Optional<String> firstName() {
         return firstName;
     }
