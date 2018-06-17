@@ -13,7 +13,7 @@
     <artifactId>java-builder2</artifactId>
     <version>0.1-SNAPSHOT</version>
     <name>${project.artifactId}</name>
-    <description>RxJava 2 utilities for AWS</description>
+    <description>Library to generate advanced builder patterns in Java</description>
     <packaging>jar</packaging>
 
     <url>http://github.com/davidmoten/java-builder2</url>
@@ -214,11 +214,6 @@
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>jdepend-maven-plugin</artifactId>
                 <version>${jdepend.version}</version>
-            </plugin>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>javancss-maven-plugin</artifactId>
-                <version>${javancss.version}</version>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
