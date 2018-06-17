@@ -1,4 +1,7 @@
 # java-builder2
+<a href="https://travis-ci.org/davidmoten/java-builder2"><img src="https://travis-ci.org/davidmoten/java-builder2.svg"/></a><br/>
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.davidmoten/java-builder2/badge.svg?style=flat)](https://maven-badges.herokuapp.com/maven-central/com.github.davidmoten/java-builder2)<br/>
+[![codecov](https://codecov.io/gh/davidmoten/java-builder2/branch/master/graph/badge.svg)](https://codecov.io/gh/davidmoten/java-builder2)
 
 Generates chained or unchained java builders (see [java-builder-pattern-tricks](https://github.com/davidmoten/java-builder-pattern-tricks)).
 
