@@ -9,6 +9,8 @@ import org.junit.Test;
 
 public class GeneratorTest {
 
+    private static final String TEST_OUTPUT_FOLDER = "src/test/java/com/github/davidmoten/javabuilder";
+
     @Test
     public void testToConsole() {
         Generator.pkg("au.gov.amsa.fax.gofax").className("Document") //
@@ -19,7 +21,17 @@ public class GeneratorTest {
                 .type("String").name("to").mandatory().build() //
                 .generate();
     }
-
+    
+    @Test
+    public void replaceNonMandatoryClass() throws IOException {
+        Generator.pkg("com.github.davidmoten.javabuilder") //
+                .className("Thing") //
+                .type("String").name("firstName").defaultValue("\"hello\"").entryMethod().build() //
+                .type("String").name("lastName").defaultValue("\"there\"").build() //
+                .generate(TEST_OUTPUT_FOLDER) //
+                .generate();
+    }
+    
     @Test
     public void replacePersonClass() throws IOException {
         Generator.pkg("com.github.davidmoten.javabuilder") //
@@ -29,7 +41,7 @@ public class GeneratorTest {
                 .type("Integer").name("age").build() //
                 .type("int").name("height").defaultValue("0").build() //
                 .type("String").name("nickname").defaultValue("\"bucko\"").build() //
-                .generate("src/test/java/com/github/davidmoten/javabuilder") //
+                .generate(TEST_OUTPUT_FOLDER) //
                 .generate();
     }
 
@@ -49,7 +61,7 @@ public class GeneratorTest {
                 .className("Person2") //
                 .type("String").name("firstName").entryMethod().build() //
                 .type("String").name("lastName").entryMethod().build() //
-                .generate("src/test/java/com/github/davidmoten/javabuilder") //
+                .generate(TEST_OUTPUT_FOLDER) //
                 .generate();
     }
 
@@ -73,7 +85,7 @@ public class GeneratorTest {
                 .className("Person3") //
                 .type("String").name("firstName").mandatory().build() //
                 .type("String").name("lastName").mandatory().build() //
-                .generate("src/test/java/com/github/davidmoten/javabuilder") //
+                .generate(TEST_OUTPUT_FOLDER) //
                 .generate();
     }
 

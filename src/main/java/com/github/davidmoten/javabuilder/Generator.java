@@ -105,10 +105,11 @@ public final class Generator {
                 // write builders
                 List<Field> mandatory = b.fields.stream().filter(f -> f.mandatory).collect(Collectors.toList());
                 List<Field> nonMandatory = b.fields.stream().filter(f -> !f.mandatory).collect(Collectors.toList());
+                boolean allNonMandatoryHaveDefaults = b.fields.stream().allMatch(f -> f.mandatory || f.defaultValue != null);
 
                 out.format("package %s;\n\n", b.pkg);
 
-                if (!nonMandatory.isEmpty()) {
+                if (!nonMandatory.isEmpty() && !allNonMandatoryHaveDefaults) {
                     out.println("import java.util.Optional;\n");
                 }
                 for (String imp : b.imports) {
