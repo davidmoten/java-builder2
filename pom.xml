@@ -26,7 +26,7 @@
         <jmh.version>1.21</jmh.version>
 
         <cobertura.version>2.7</cobertura.version>
-        <checkstyle.version>2.16</checkstyle.version>
+        <checkstyle.version>3.1.2</checkstyle.version>
         <findbugs.version>2.5.4</findbugs.version>
         <javadoc.version>3.3.2</javadoc.version>
         <pmd.version>3.5</pmd.version>
