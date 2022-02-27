@@ -1,5 +1,5 @@
 # java-builder2
-<a href="https://travis-ci.org/davidmoten/java-builder2"><img src="https://travis-ci.org/davidmoten/java-builder2.svg"/></a><br/>
+<a href="https://github.com/davidmoten/java-builder2/actions/workflows/ci.yml"><img src="https://github.com/davidmoten/java-builder2/actions/workflows/ci.yml/badge.svg"/></a><br/>
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.davidmoten/java-builder2/badge.svg?style=flat)](https://maven-badges.herokuapp.com/maven-central/com.github.davidmoten/java-builder2)<br/>
 [![codecov](https://codecov.io/gh/davidmoten/java-builder2/branch/master/graph/badge.svg)](https://codecov.io/gh/davidmoten/java-builder2)
 
